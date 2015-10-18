@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+				window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+				window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+
+				if (!window.indexedDB) {
+					alert("Your browser doesn't support a stable version of IndexedDB.");
+				}
+
+				var db;
+				var request = window.indexedDB.open("Todo", 3);
+				request.onsuccess = function(event) {
+					db = event.target.result;
+					var objectStore = db.transaction("tasks").objectStore("tasks")
+
+					showTasks(objectStore)
+				};
+				request.onerror = function(event) {
+					alert("You did not allow us to store data locally.")
+				};
+				request.onupgradeneeded = function(event) {
+					db = event.target.result;
+					db.createObjectStore("tasks", { autoIncrement : true });
+					console.log("Created new object store.")
+				};
+
+				$('#newTaskInput').on('keypress', function(e) {
+					if (e.keyCode == 13 && db) {
+						var objectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+						objectStore.add($('#newTaskInput').val());
+
+						showTasks(objectStore)
+					}
+				});
+			});
+
+			function showTasks(objectStore) {
+				var container = $('#tasksList');
+				container.empty();
+
+				objectStore.openCursor().onsuccess = function(event) {
+					var cursor = event.target.result;
+
+					if (cursor) {
+						$('<input />', { type: 'checkbox' }).appendTo(container);
+						$('<label />', { text: cursor.value }).appendTo(container);
+						$('<br>').appendTo(container);
+						cursor.continue();
+					}
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<input id="newTaskInput" />
+		<div id="tasksList" />
+	</body>
+</html>
