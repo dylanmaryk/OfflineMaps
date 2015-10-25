@@ -25,14 +25,16 @@
 				};
 				request.onupgradeneeded = function(event) {
 					db = event.target.result;
-					db.createObjectStore("tasks", { autoIncrement : true });
+					// Cannot use auto-incrementing IDs as otherwise updating records with "IDBObjectStore.put()" adds new record
+					db.createObjectStore("tasks");
 					console.log("Created new object store.");
 				};
 
 				$('#newTaskInput').on('keypress', function(e) {
 					if (e.keyCode == 13 && db) {
 						var objectStore = db.transaction("tasks", "readwrite").objectStore("tasks");
-						objectStore.add([$('#newTaskInput').val(), false]);
+						// Use current time as unique ID
+						objectStore.add([$('#newTaskInput').val(), false], (new Date).getTime());
 
 						showTasks();
 					}
@@ -54,12 +56,12 @@
 						cursor.continue();
 					} else {
 						$(':checkbox').change(function() {
+							taskID = parseInt(this.name);
 							var objectStore = db.transaction("tasks", "readwrite").objectStore("tasks");
-							var request = objectStore.get(parseInt(this.name));
+							var request = objectStore.get(taskID);
 							request.onsuccess = function(event) {
 								request.result[1] = !request.result[1];
-								var requestUpdate = objectStore.put(request.result);
-								console.log(requestUpdate);
+								var requestUpdate = objectStore.put(request.result, taskID);
 								requestUpdate.onerror = function(event) {
 									// If failed to update, reload existing data
 									showTasks();
