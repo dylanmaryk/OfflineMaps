@@ -5,11 +5,12 @@
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$.get("http://api06.dev.openstreetmap.org/api/0.6/map?bbox=-0.221272,51.4801,-0.071754,51.533309", function(data) {
-					console.log(data);
+					$("p").text((new XMLSerializer()).serializeToString(data));
 				});
 			});
 		</script>
 	</head>
 	<body>
+		<p />
 	</body>
 </html>
