@@ -1,3 +1,5 @@
 CACHE MANIFEST
 js/jquery.min.js
 js/offlinemaps.js
+js/osmtogeojson.js
+london.osm

@@ -10,4 +10,8 @@
 \f0 \kerning1\expnd0\expndtw0 \'94:\
 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
-{\field{\*\fldinst{HYPERLINK "http://api.openstreetmap.org/api/0.6/map?bbox=-0.489,51.28,0.236,51.686"}}{\fldrslt \cf0 http://api06.dev.openstreetmap.org/api/0.6/map?bbox=-0.221272,51.4801,-0.071754,51.533309}}}
+{\field{\*\fldinst{HYPERLINK "http://api.openstreetmap.org/api/0.6/map?bbox=-0.489,51.28,0.236,51.686"}}{\fldrslt \cf0 http://api06.dev.openstreetmap.org/api/0.6/map?bbox=-0.221272,51.4801,-0.071754,51.533309}}\
+\
+The raw data can be retrieved from this URL using JavaScript in the browser, meaning it can then be stored locally on the user\'92s device, so that the same data does not need to be requested every time the page is loaded. However, because this data may be uploaded frequently, and I believe it best to rely on other organisation\'92s servers as little as possible, due to possible downtime for example, I have decided to write a bash script that can be made to run periodically. This bash script can frequently download files required by the project, such as not only .osm files but also jQuery JavaScript files. The user\'92s browser can then download and cache these files directly from my own server.\
+\
+In terms of rendering raw OpenStreetMap data, I want to find a method for parsing and displaying it as manually as possible i.e. finding a balance between producing my own code and making use of existing libraries. A starting point is to convert the OpenStreetMap data from an XML format into a GeoJSON format. This will become useful as many JavaScript mapping libraries, such as Leaflet, work with GeoJSON formatted data. I have chosen to do this using the osmtogeojson open-source library ({\field{\*\fldinst{HYPERLINK "https://github.com/tyrasd/osmtogeojson"}}{\fldrslt https://github.com/tyrasd/osmtogeojson}}).}
