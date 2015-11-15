@@ -16,8 +16,8 @@ $(document).ready(function() {
 		db = event.target.result;
 
 		if (tilesToStore) {
-			$.each(tilesToStore, function(tileImageData) {
-				storeTileImage(tileImageData);
+			$.each(tilesToStore, function(index, value) {
+				storeTileImage(value.image, value.point);
 			});
 		}
 	};
@@ -40,12 +40,13 @@ $(document).ready(function() {
 		event.tile.crossOrigin = "Anonymous";
 	});
 	osm.on("tileload", function(event) {
-		var tileImageData = getBase64Image(event.tile);
+		var tileImageString = getBase64Image(event.tile);
+		var tileImagePoint = event.tile.point;
 
 		if (db) {
-			storeTileImage(tileImageData);
+			storeTileImage(tileImageString, tileImagePoint);
 		} else {
-			tilesToStore.push(tileImageData);
+			tilesToStore.push({image: tileImageString, point: tileImagePoint});
 		}
 	});
 	osm.addTo(map);
@@ -57,9 +58,12 @@ $(document).ready(function() {
 	});
 });
 
-function storeTileImage(tileImageData) {
+function storeTileImage(tileImageString, tileImagePoint) {
+	var x = tileImagePoint.x;
+	var y = tileImagePoint.y;
+	var z = tileImagePoint.z;
 	var objectStore = db.transaction("tile", "readwrite").objectStore("tile");
-	objectStore.add(tileImageData, (new Date).getTime());
+	objectStore.add(tileImageString, x + "," + y + "," + z);
 }
 
 // From http://stackoverflow.com/a/19183658
@@ -76,9 +80,10 @@ function getBase64Image(img) {
 	return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
 }
 
+// Required to ensure we can set the tile's "crossOrigin" parameter before its "src" parameter is set
 var CustomTileLayer = L.TileLayer.extend({
 	_loadTile: function(t, e) {
-		t._layer = this, t.onload = this._tileOnLoad, t.onerror = this._tileOnError, this._adjustTilePoint(e), this.fire("tileloadstart", {
+		t._layer = this, t.onload = this._tileOnLoad, t.onerror = this._tileOnError, this._adjustTilePoint(e), t.point = e, this.fire("tileloadstart", {
 			tile: t,
 			url: t.src
 		}), t.src = this.getTileUrl(e)
