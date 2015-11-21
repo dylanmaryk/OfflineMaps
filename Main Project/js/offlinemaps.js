@@ -43,6 +43,7 @@ $(document).ready(function() {
 		var tileImageString = getBase64Image(event.tile);
 		var tileImagePoint = event.tile.point;
 
+		// If database not yet initialised, push tile to array of tiles to be added once database is initialised
 		if (db) {
 			storeTileImage(tileImageString, tileImagePoint);
 		} else {
@@ -102,19 +103,30 @@ function getBase64Image(img) {
 	return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
 }
 
+var tilesToCheck = [];
+var tilesToCheckCounter = 0;
+
 var CustomTileLayer = L.TileLayer.extend({
-	// Required to ensure we can set the tile's "crossOrigin" parameter before its "src" parameter is set
+	// Override required to ensure we can set the tile's "crossOrigin" parameter before its "src" parameter is set
 	_loadTile: function(t, e) {
-		t._layer = this, t.onload = this._tileOnLoad, t.onerror = this._tileOnError, this._adjustTilePoint(e), t.point = e, this.fire("tileloadstart", {
-			tile: t,
-			url: t.src
-		}), t.src = this.getTileUrl(e)
-	},
-	_tileOnError: function() {
-		var t = this._layer;
-		t.fire("tileerror", {
-			tile: this,
-			url: this.src
-		});
+		t._layer = this, t.onload = this._tileOnLoad, this._adjustTilePoint(e), t.point = e, this.fire("tileloadstart", {
+			tile: t
+		}), t.src = this.getTileUrl(e);
+
+		// Timeout after 5 seconds, so if no image loaded from OpenStreetMap, load cached image
+		tilesToCheck.push(t);
+		setTimeout(checkImageLoaded, 5000, this);
 	}
 });
+
+function checkImageLoaded(layer) {
+	var tile = tilesToCheck[tilesToCheckCounter];
+
+	if (!tile.complete) {
+		layer.fire("tileerror", {
+			tile: tile
+		});
+	}
+
+	tilesToCheckCounter++;
+}
