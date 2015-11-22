@@ -59,7 +59,7 @@ $(document).ready(function() {
 				var tileImageString = request.result;
 
 				if (tileImageString) {
-					tile.src = "data:image/png;base64," + tileImageString;
+					tile.src = tileImageString;
 				} else {
 					console.log("No tile image stored for point " + tileImagePointString + ".");
 				}
@@ -100,7 +100,7 @@ function getBase64Image(img) {
 	ctx.drawImage(img, 0, 0);
 	var dataURL = canvas.toDataURL("image/png");
 
-	return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+	return dataURL;
 }
 
 var tilesToCheck = [];
