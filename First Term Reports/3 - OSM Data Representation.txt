@@ -17,3 +17,66 @@ $.get("london.osm", function(data) {
 I opted to experiment with using the open-source JavaScript library Leaflet (http://leafletjs.com/), as it is designed with being mobile-friendly in mind, is lightweight (beneficial in terms of being quick to cache and taking up minimal storage space on the user’s device) and because it is open-source can be more easily modified. There are therefore also many other open-source projects that build upon Leaflet already in existence.
 
 The above accounts for the basics of how to get and display useful information for the user without an Internet connection, the .osm, .js etc. files required being cached when the user first visits the website while they are online. However, it is also vital to retrieve and cache map tiles from OpenStreetMap, these tiles representing the map itself underneath the additional information. This project therefore combines image tiles and vectors: images tiles for the essential map itself and vectors for the additional details that, later on in development, will allow the user to view and search for specific information.
+
+Leaflet handles the basics of loading and displaying tiles. It allows for initialising a tile layer with a URL template that is used to generate the URL for each tile to display, along with a number of optional parameters (http://leafletjs.com/reference.html#tilelayer).
+
+var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+var osmLayer = new CustomTileLayer(osmUrl);
+
+I am using my own extended version of the tile layer class, “CustomTileLayer”, which I will go into detail about later. The URL template has four parameters: “{s}” for one of the available subdomains to aid possible parallel requests, “{z}” for the map’s current zoom level, “{x}” and “{y}” for the coordinates of the tile for which an image is being requested. Leaflet handles adding these parameters and adding the resulting URL as the source of the relevant HTML object that represents the tile. This covers displaying the correct map tiles on request, but the next step is to add functionality on top of Leaflet to handle caching these images to an IndexedDB database, so they can be loaded instead if the user is offline.
+
+var request = window.indexedDB.open("TileStorage", 3);
+
+This line opens the “TileStorage” database so it can be interacted with. There are three event handlers for this that I make use of (https://developer.mozilla.org/en-US/docs/Web/API/IDBOpenDBRequest). When “onsuccess” is called, the database exists, so the database is initialised.
+
+db = event.target.result;
+
+When “onerror” is called, it is most likely the user did not give permission for the browser to use IndexedDB, so an error is printed in the console.
+
+console.log("Did not allow local data storage.");
+
+When “onupgradeneeded” is called, the database does not yet contain an object store, so a new one is created.
+
+db = event.target.result;
+db.createObjectStore("tile");
+console.log("Created new object store.");
+
+This handles the structuring of the database, ready for adding data to and retrieving data from the “tile” object store.
+
+Probably the most important part of the process of caching images however is done when certain events are fired by the tile layer instance. I respond to three events. The first is “tileloadstart”, fired before an image source is added to a tile.
+
+event.tile.crossOrigin = "Anonymous";
+
+This line sets the “crossOrigin” parameter of the tile to “Anonymous”, which is necessary to allow the image, once it has been downloaded, to be retrieved from a canvas once that canvas has been used to transform the image into a Base64 formatted string. Otherwise, when attempting to retrieve the formatted string from the canvas, an error will be raised saying that the canvas has been “tainted”. This is a security measure in place for when, as in this case, images defined by an “img” element are loaded from a foreign source, which “protects users from having private data exposed by using images to pull information from remote web sites without permission” (https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image).
+
+The second event responded to is “tileload”, fired when an image has been successfully loaded.
+
+var tileImageString = getBase64Image(event.tile);
+var tileImagePoint = event.tile.point;
+
+if (db) {
+	storeTileImage(tileImageString, tileImagePoint);
+} else {
+	tilesToStore.push({image: tileImageString, point: tileImagePoint});
+}
+
+If the database has been initialised, the tile’s image, in Base64 format, and the tile’s position and zoom level are added to the “tile” object store. Otherwise, they are pushed to an array. Once the database has been initialised, the images and positions stored in this array will be added to the object store.
+
+Finally, the “tileerror” event is responded to, fired when the image loading process times out.
+
+if (db) {
+	var tile = event.tile;
+	var tileImagePointString = getPointString(tile.point);
+	var request = getObjectStore().get(tileImagePointString);
+	request.onsuccess = function(event) {
+		var tileImageString = request.result;
+
+		if (tileImageString) {
+			tile.src = tileImageString;
+		} else {
+			console.log("No tile image stored for point " + tileImagePointString + ".");
+		}
+	};
+}
+
+Tile images and positions are stored in the object store using a key-value relationship: the position and zoom level is the unique key and the image as a Base64 string is the value. If the database has been initialised, the value for the tile’s position is attempted to be retrieved from the database. If successful, this value is set as the tile’s image source.

@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script type="text/javascript">
+			var db;
+
+			$(document).ready(function() {
+				window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+				window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+				window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+
+				if (!window.indexedDB) {
+					alert("Your browser doesn't support a stable version of IndexedDB.");
+				}
+
+				var request = window.indexedDB.open("Todo", 3);
+				request.onsuccess = function(event) {
+					db = event.target.result;
+
+					showTasks();
+				};
+				request.onerror = function(event) {
+					alert("You did not allow us to store data locally.")
+				};
+				request.onupgradeneeded = function(event) {
+					db = event.target.result;
+					// Cannot use auto-incrementing IDs as otherwise updating records with "IDBObjectStore.put()" adds new record
+					db.createObjectStore("tasks");
+					console.log("Created new object store.");
+				};
+
+				$('#newTaskInput').on('keypress', function(e) {
+					if (e.keyCode == 13 && db) {
+						var objectStore = db.transaction("tasks", "readwrite").objectStore("tasks");
+						// Use current time as unique ID
+						objectStore.add([$('#newTaskInput').val(), false], (new Date).getTime());
+
+						showTasks();
+					}
+				});
+			});
+
+			function showTasks() {
+				var container = $('#tasksList');
+				container.empty();
+				var objectStore = db.transaction("tasks").objectStore("tasks");
+				var openCursor = objectStore.openCursor();
+				openCursor.onsuccess = function(event) {
+					var cursor = event.target.result;
+
+					if (cursor) {
+						$('<input />', { type: 'checkbox', name: cursor.key, checked: cursor.value[1] }).appendTo(container);
+						$('<label />', { text: cursor.value[0] }).appendTo(container);
+						$('<br>').appendTo(container);
+						cursor.continue();
+					} else {
+						$(':checkbox').change(function() {
+							taskID = parseInt(this.name);
+							var objectStore = db.transaction("tasks", "readwrite").objectStore("tasks");
+							var request = objectStore.get(taskID);
+							request.onsuccess = function(event) {
+								request.result[1] = !request.result[1];
+								var requestUpdate = objectStore.put(request.result, taskID);
+								requestUpdate.onerror = function(event) {
+									// If failed to update, reload existing data
+									showTasks();
+								};
+							};
+							request.onerror = function(event) {
+								alert("Failed to update the completion of this task.")
+							};
+						});
+					}
+				};
+				openCursor.onerror = function(event) {
+					alert("Failed to get the list of tasks.")
+				};
+			}
+		</script>
+	</head>
+	<body>
+		<input id="newTaskInput" />
+		<div id="tasksList" />
+	</body>
+</html>

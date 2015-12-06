@@ -1,0 +1,23 @@
+Running the programs:
+All the programs will run offline, and no other programs need to be executed first to make them work, but I recommend testing them online on my website, particularly for properly testing the programs built to work both online and offline.
+
+Early deliverable - Hello World: http://dylanmaryk.com/offlinemaps/helloworld/
+- After accessing this page while online, go offline and refresh it.
+
+Early deliverable - TODO: http://dylanmaryk.com/offlinemaps/todo/
+- NOTE: This deliverable is not intended to work offline.
+- After typing any text in the text box, press the Enter key to add the text as a task to the list.
+- Click the checkbox to mark the task as completed. Refresh the page. The task and ticked checkbox will remain present.
+- Add as many tasks as you like, check/uncheck them, refresh the page etc.
+
+Early deliverable - Raw Data: http://dylanmaryk.com/offlinemaps/rawdata/
+- NOTE: This deliverable is not intended to work offline.
+- Wait 10 seconds or so for the data to load.
+
+Main project: http://dylanmaryk.com/offlinemaps/main/
+- NOTE: The vector data (blue pins on the map) only works on the online version.
+- After accessing this page while online, scroll around the map a bit, zoom in and out a bit, then refresh it.
+- Any tiles and data that was loaded while online is now viewable offline.
+
+Git history:
+My Git repository is available on GitHub at https://github.com/dylanmaryk/OfflineMaps
