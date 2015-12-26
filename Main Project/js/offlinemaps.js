@@ -1,4 +1,5 @@
 var db;
+var tilesToLoad = [];
 
 $(document).ready(function() {
 	window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
@@ -15,13 +16,19 @@ $(document).ready(function() {
 	request.onsuccess = function(event) {
 		db = event.target.result;
 
-		if (tilesToStore) {
-			$.each(tilesToStore, function(index, value) {
-				storeTileImage(value.image, value.point);
-			});
-		}
+		$.each(tilesToStore, function(index, value) {
+			storeTileImage(value.image, value.point);
+		});
+
+		$.each(tilesToLoad, function(index, value) {
+			loadStoredTileImage(value.tile, value.remoteUrl);
+		});
 	};
 	request.onerror = function(event) {
+		$.each(tilesToLoad, function(index, value) {
+			value.tile.src = value.remoteUrl;
+		});
+
 		console.log("Did not allow local data storage.");
 	};
 	request.onupgradeneeded = function(event) {
@@ -40,40 +47,56 @@ $(document).ready(function() {
 		event.tile.crossOrigin = "Anonymous";
 	});
 	osmLayer.on("tileload", function(event) {
-		var tileImageString = getBase64Image(event.tile);
-		var tileImagePoint = event.tile.point;
+		var tile = event.tile;
+		var url = event.url;
+		var tileImagePoint = tile.point;
+		var tileImageString;
 
-		// If database not yet initialised, push tile to array of tiles to be added once database is initialised
-		if (db) {
-			storeTileImage(tileImageString, tileImagePoint);
+		// Check if tile's current image is from storage
+		if (url.substr(0, 4) == "data") {
+			// Attempt loading remote image after loading stored copy
+			tile.src = this.getTileUrl(tileImagePoint);
 		} else {
-			tilesToStore.push({image: tileImageString, point: tileImagePoint});
-		}
-	});
-	osmLayer.on("tileerror", function(event) {
-		if (db) {
-			var tile = event.tile;
-			var tileImagePointString = getPointString(tile.point);
-			var request = getObjectStore().get(tileImagePointString);
-			request.onsuccess = function(event) {
-				var tileImageString = request.result;
+			tileImageString = getBase64Image(tile);
 
-				if (tileImageString) {
-					tile.src = tileImageString;
-				} else {
-					console.log("No tile image stored for point " + tileImagePointString + ".");
-				}
-			};
+			// If database not yet initialised, push tile to array of tiles to be added once database is initialised
+			if (db) {
+				storeTileImage(tileImageString, tileImagePoint);
+			} else {
+				tilesToStore.push({image: tileImageString, point: tileImagePoint});
+			}
 		}
 	});
 	osmLayer.addTo(map);
 
+	/*
 	$.get("london.osm", function(data) {
 		var dataParsed = $.parseXML(data);
 		var dataGeoJson = osmtogeojson(dataParsed);
 		L.geoJson(dataGeoJson).addTo(map);
 	});
+	*/
 });
+
+function loadStoredTileImage(tile, remoteUrl) {
+	if (db) {
+		var tileImagePointString = getPointString(tile.point);
+		var request = getObjectStore().get(tileImagePointString);
+		request.onsuccess = function(event) {
+			var tileImageString = request.result;
+
+			if (tileImageString) {
+				tile.src = tileImageString;
+			} else {
+				// Load remote image if failed to find stored copy
+				tile.src = remoteUrl;
+				console.log("No tile image stored for point " + tileImagePointString + ".");
+			}
+		};
+	} else {
+		tilesToLoad.push({tile: tile, remoteUrl: remoteUrl});
+	}
+}
 
 function storeTileImage(tileImageString, tileImagePoint) {
 	getObjectStore().add(tileImageString, getPointString(tileImagePoint));
@@ -103,30 +126,13 @@ function getBase64Image(img) {
 	return dataURL;
 }
 
-var tilesToCheck = [];
-var tilesToCheckCounter = 0;
-
 var CustomTileLayer = L.TileLayer.extend({
 	// Override required to ensure we can set the tile's "crossOrigin" parameter before its "src" parameter is set
 	_loadTile: function(t, e) {
 		t._layer = this, t.onload = this._tileOnLoad, this._adjustTilePoint(e), t.point = e, this.fire("tileloadstart", {
 			tile: t
-		}), t.src = this.getTileUrl(e);
+		});
 
-		// Timeout after 5 seconds, so if no image loaded from OpenStreetMap, load cached image
-		tilesToCheck.push(t);
-		setTimeout(checkImageLoaded, 5000, this);
+		loadStoredTileImage(t, this.getTileUrl(e));
 	}
 });
-
-function checkImageLoaded(layer) {
-	var tile = tilesToCheck[tilesToCheckCounter];
-
-	if (!tile.complete) {
-		layer.fire("tileerror", {
-			tile: tile
-		});
-	}
-
-	tilesToCheckCounter++;
-}
