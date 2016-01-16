@@ -6,3 +6,5 @@ wget -O js/images/marker-shadow.png "http://cdn.leafletjs.com/leaflet/v0.7.7/ima
 wget -O js/osmtogeojson.js "https://raw.githubusercontent.com/tyrasd/osmtogeojson/gh-pages/osmtogeojson.js"
 
 wget -O london.osm "http://api06.dev.openstreetmap.org/api/0.6/map?bbox=-0.221272,51.4801,-0.071754,51.533309"
+
+wget -O img/download.png "https://raw.githubusercontent.com/google/material-design-icons/master/navigation/2x_web/ic_arrow_downward_black_18dp.png"
