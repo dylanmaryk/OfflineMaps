@@ -1,5 +1,6 @@
-var db;
-var tilesToLoad = [];
+var db,
+	tilePoints = [],
+	tilesToLoad = [];
 
 $(document).ready(function() {
 	window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
@@ -41,23 +42,22 @@ $(document).ready(function() {
 	var map = L.map("map");
 	map.setView(new L.LatLng(51.505, -0.09), 12);
 
-	var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-	var osmLayer = new CustomTileLayer(osmUrl);
+	var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+		osmLayer = new CustomTileLayer(osmUrl);
 	osmLayer.on("tileloadstart", function(event) {
 		event.tile.crossOrigin = "Anonymous";
 	});
 	osmLayer.on("tileload", function(event) {
-		var tile = event.tile;
-		var url = event.url;
-		var tileImagePoint = tile.point;
-		var tileImageString;
+		var tile = event.tile,
+			url = event.url,
+			tileImagePoint = tile.point;
 
 		// Check if tile's current image is from storage
 		if (url.substr(0, 4) == "data") {
 			// Attempt loading remote image after loading stored copy
 			tile.src = this.getTileUrl(tileImagePoint);
 		} else {
-			tileImageString = getBase64Image(tile);
+			var tileImageString = getBase64Image(tile);
 
 			// If database not yet initialised, push tile to array of tiles to be added once database is initialised
 			if (db) {
@@ -68,6 +68,8 @@ $(document).ready(function() {
 		}
 	});
 	osmLayer.addTo(map);
+
+	downloadVisibleArea(tilePoints, map.getZoom(), osmLayer);
 
 	/*
 	$.get("london.osm", function(data) {
@@ -80,8 +82,8 @@ $(document).ready(function() {
 
 function loadStoredTileImage(tile, remoteUrl) {
 	if (db) {
-		var tileImagePointString = getPointString(tile.point);
-		var request = getObjectStore().get(tileImagePointString);
+		var tileImagePointString = getPointString(tile.point),
+			request = getObjectStore().get(tileImagePointString);
 		request.onsuccess = function(event) {
 			var tileImageString = request.result;
 
@@ -99,7 +101,8 @@ function loadStoredTileImage(tile, remoteUrl) {
 }
 
 function storeTileImage(tileImageString, tileImagePoint) {
-	getObjectStore().add(tileImageString, getPointString(tileImagePoint));
+	var tileImagePointString = getPointString(tileImagePoint);
+	getObjectStore().add(tileImageString, tileImagePointString);
 }
 
 function getObjectStore() {
@@ -107,14 +110,13 @@ function getObjectStore() {
 }
 
 function getPointString(tileImagePoint) {
-	var x = tileImagePoint.x;
-	var y = tileImagePoint.y;
-	var z = tileImagePoint.z;
+	var x = tileImagePoint.x,
+		y = tileImagePoint.y,
+		z = tileImagePoint.z;
 
 	return x + "," + y + "," + z;
 }
 
-// From http://stackoverflow.com/a/19183658
 function getBase64Image(img) {
 	var canvas = document.createElement("canvas");
 	canvas.width = img.width;
@@ -126,13 +128,59 @@ function getBase64Image(img) {
 	return dataURL;
 }
 
+function downloadVisibleArea(visibleTilePoints, zoomLevel, layer) {
+	$.each(visibleTilePoints, function(index, tilePoint) {
+		//downloadPoint(tilePoint, zoomLevel + 1, layer);
+	});
+	downloadPoint(visibleTilePoints[0], zoomLevel + 1, layer);
+}
+
+function downloadPoint(tilePoint, zoomLevel, layer) {
+	var map = layer._map,
+		tileLatLng = getPointToLatLng(tilePoint),
+		mapTopLeftPoint = map._getNewTopLeftPoint(tileLatLng, zoomLevel),
+		tileSize = layer._getTileSize(),
+		mapPixelBounds = new L.Bounds(mapTopLeftPoint, mapTopLeftPoint.add(map.getSize())),
+		mapPointBounds = new L.bounds(mapPixelBounds.min.divideBy(tileSize)._floor(), mapPixelBounds.max.divideBy(tileSize)._floor());
+
+	for (var pointX = mapPointBounds.min.x; pointX <= mapPointBounds.max.x; pointX++) {
+		for (var pointY = mapPointBounds.min.y; pointY <= mapPointBounds.max.y; pointY++) {
+			var newTilePoint = new L.Point(pointX, pointY);
+			newTilePoint.z = zoomLevel;
+			var tileImageUrl = layer.getTileUrl(newTilePoint);
+			var tileImage = new Image();
+			tileImage.crossOrigin = "Anonymous";
+			tileImage.src = tileImageUrl;
+			tileImage.onload = function() {
+				var tileImageString = getBase64Image(this);
+				storeTileImage(tileImageString, newTilePoint);
+			};
+
+			if (zoomLevel < map.getMaxZoom()) {
+				downloadPoint(newTilePoint, zoomLevel + 1, layer);
+			}
+		}
+	}
+}
+
+function getPointToLatLng(point) {
+	var lng = point.x / Math.pow(2, point.z) * 360 - 180,
+		n = Math.PI - 2 * Math.PI * point.y / Math.pow(2, point.z),
+		lat = 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+
+	return new L.LatLng(lat, lng);
+}
+
 var CustomTileLayer = L.TileLayer.extend({
-	// Override required to ensure we can set the tile's "crossOrigin" parameter before its "src" parameter is set
 	_loadTile: function(t, e) {
+		// Override required to ensure we can set the tile's "crossOrigin" parameter before its "src" parameter is set
 		t._layer = this, t.onload = this._tileOnLoad, this._adjustTilePoint(e), t.point = e, this.fire("tileloadstart", {
 			tile: t
 		});
 
+		tilePoints.push(e);
+
+		// Override required to attempt loading stored image before loading remote image
 		loadStoredTileImage(t, this.getTileUrl(e));
 	}
 });
