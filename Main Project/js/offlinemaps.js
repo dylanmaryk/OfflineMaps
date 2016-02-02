@@ -1,6 +1,7 @@
 var db,
 	tilePoints = [],
-	tilesToLoad = [];
+	tilesToLoad = [],
+	downloadedTilesToStore = [];
 
 $(document).ready(function() {
 	window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
@@ -132,12 +133,11 @@ function getBase64Image(img) {
 
 function downloadVisibleArea(visibleTilePoints, zoomLevel, layer) {
 	$.each(visibleTilePoints, function(index, tilePoint) {
-		//downloadPoint(tilePoint, zoomLevel + 1, layer);
+		downloadPoint(tilePoint, zoomLevel + 1, visibleTilePoints.length, zoomLevel, layer);
 	});
-	downloadPoint(visibleTilePoints[0], zoomLevel + 1, layer);
 }
 
-function downloadPoint(tilePoint, zoomLevel, layer) {
+function downloadPoint(tilePoint, zoomLevel, visibleTilesCount, originalZoomLevel, layer) {
 	var map = layer._map,
 		tileLatLng = getPointToLatLng(tilePoint),
 		mapTopLeftPoint = map._getNewTopLeftPoint(tileLatLng, zoomLevel),
@@ -154,14 +154,34 @@ function downloadPoint(tilePoint, zoomLevel, layer) {
 			tileImage.crossOrigin = "Anonymous";
 			tileImage.onload = function() {
 				var tileImageString = getBase64Image(this);
-				storeTileImage(tileImageString, newTilePoint);
+				downloadedTilesToStore.push({image: tileImageString, point: newTilePoint});
+
+				if (downloadedTilesToStore.length >= Math.pow(visibleTilesCount, (zoomLevel - originalZoomLevel) + 1)) {
+					storeDownloadedTiles();
+				}
 			};
 			tileImage.src = tileImageUrl;
 
-			if (zoomLevel < map.getMaxZoom()) {
-				downloadPoint(newTilePoint, zoomLevel + 1, layer);
+			if (zoomLevel - originalZoomLevel < 0 && zoomLevel < map.getMaxZoom()) {
+				downloadPoint(newTilePoint, zoomLevel + 1, originalZoomLevel, layer);
 			}
 		}
+	}
+}
+
+function storeDownloadedTiles() {
+	storeDownloadedTileAtPos(0);
+}
+
+function storeDownloadedTileAtPos(downloadedTilePos) {
+	if (downloadedTilePos < downloadedTilesToStore.length) {
+		var tileImagePointString = getPointString(downloadedTilesToStore[downloadedTilePos].point);
+		var tileImageString = downloadedTilesToStore[downloadedTilePos].image;
+		getObjectStore().put(tileImageString, tileImagePointString).onsuccess = function(event) {
+			storeDownloadedTileAtPos(downloadedTilePos + 1);
+		};
+	} else {
+		// Clear downloadedTilesToStore
 	}
 }
 
