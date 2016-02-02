@@ -102,11 +102,13 @@ function loadStoredTileImage(tile, remoteUrl) {
 
 function storeTileImage(tileImageString, tileImagePoint) {
 	var tileImagePointString = getPointString(tileImagePoint);
-	getObjectStore().add(tileImageString, tileImagePointString);
+	getObjectStore().put(tileImageString, tileImagePointString);
 }
 
 function getObjectStore() {
-	return db.transaction("tile", "readwrite").objectStore("tile");
+	var transaction = db.transaction("tile", "readwrite");
+
+	return transaction.objectStore("tile");
 }
 
 function getPointString(tileImagePoint) {
@@ -150,11 +152,11 @@ function downloadPoint(tilePoint, zoomLevel, layer) {
 			var tileImageUrl = layer.getTileUrl(newTilePoint);
 			var tileImage = new Image();
 			tileImage.crossOrigin = "Anonymous";
-			tileImage.src = tileImageUrl;
 			tileImage.onload = function() {
 				var tileImageString = getBase64Image(this);
 				storeTileImage(tileImageString, newTilePoint);
 			};
+			tileImage.src = tileImageUrl;
 
 			if (zoomLevel < map.getMaxZoom()) {
 				downloadPoint(newTilePoint, zoomLevel + 1, layer);
