@@ -152,9 +152,10 @@ function downloadPoint(tilePoint, zoomLevel, visibleTilesCount, originalZoomLeve
 			var tileImageUrl = layer.getTileUrl(newTilePoint);
 			var tileImage = new Image();
 			tileImage.crossOrigin = "Anonymous";
+			tileImage.point = newTilePoint;
 			tileImage.onload = function() {
 				var tileImageString = getBase64Image(this);
-				downloadedTilesToStore.push({image: tileImageString, point: newTilePoint});
+				downloadedTilesToStore.push({image: tileImageString, point: this.point});
 
 				if (downloadedTilesToStore.length >= Math.pow(visibleTilesCount, (zoomLevel - originalZoomLevel) + 1)) {
 					storeDownloadedTiles();
