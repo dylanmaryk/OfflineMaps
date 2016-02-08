@@ -70,7 +70,9 @@ $(document).ready(function() {
 	});
 	osmLayer.addTo(map);
 
-	downloadVisibleArea(tilePoints, map.getZoom(), osmLayer);
+	$("#btnDownload").click(function() {
+		downloadVisibleArea(tilePoints, map.getZoom(), osmLayer);
+	});
 
 	/*
 	$.get("london.osm", function(data) {
