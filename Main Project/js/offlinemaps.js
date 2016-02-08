@@ -163,7 +163,7 @@ function downloadPoint(tilePoint, zoomLevel, visibleTilesCount, originalZoomLeve
 			};
 			tileImage.src = tileImageUrl;
 
-			if (zoomLevel - originalZoomLevel < 0 && zoomLevel < map.getMaxZoom()) {
+			if (zoomLevel - originalZoomLevel < 1 && zoomLevel < map.getMaxZoom()) {
 				downloadPoint(newTilePoint, zoomLevel + 1, originalZoomLevel, layer);
 			}
 		}
@@ -178,11 +178,13 @@ function storeDownloadedTileAtPos(downloadedTilePos) {
 	if (downloadedTilePos < downloadedTilesToStore.length) {
 		var tileImagePointString = getPointString(downloadedTilesToStore[downloadedTilePos].point);
 		var tileImageString = downloadedTilesToStore[downloadedTilePos].image;
-		getObjectStore().put(tileImageString, tileImagePointString).onsuccess = function(event) {
-			storeDownloadedTileAtPos(downloadedTilePos + 1);
+		var objectStore = getObjectStore();
+		objectStore.transaction.tilePos = downloadedTilePos;
+		objectStore.put(tileImageString, tileImagePointString).onsuccess = function(event) {
+			storeDownloadedTileAtPos(this.transaction.tilePos + 1);
 		};
 	} else {
-		// Clear downloadedTilesToStore
+		downloadedTilesToStore = [];
 	}
 }
 
