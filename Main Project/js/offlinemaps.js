@@ -98,7 +98,7 @@ function loadStoredTileImage(tile, remoteUrl) {
 			} else {
 				// Load remote image if failed to find stored copy
 				tile.src = remoteUrl;
-				console.log("No tile image stored for point " + tileImagePointString + ".");
+				// console.log("No tile image stored for point " + tileImagePointString + ".");
 			}
 		};
 	} else {
@@ -137,12 +137,15 @@ function getBase64Image(img) {
 }
 
 function downloadVisibleArea(layer) {
-	var zoomLevel = layer._map.getZoom();
+	var map = layer._map,
+		zoomLevel = layer._map.getZoom();
 
-	if (zoomLevel <= map.getMaxZoom()) {
+	if (zoomLevel < map.getMaxZoom()) {
 		$.each(tilePoints, function(index, tilePoint) {
 			downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == tilePoints.length - 1, layer);
 		});
+	} else {
+		console.log("The currently visible area has already been downloaded.");
 	}
 }
 
