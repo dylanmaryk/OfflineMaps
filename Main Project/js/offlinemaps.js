@@ -164,7 +164,7 @@ function downloadPoint(tilePoint, zoomLevel, visibleTilesCount, originalZoomLeve
 			tileImage.src = tileImageUrl;
 
 			if (zoomLevel - originalZoomLevel < 1 && zoomLevel < map.getMaxZoom()) {
-				downloadPoint(newTilePoint, zoomLevel + 1, originalZoomLevel, layer);
+				downloadPoint(newTilePoint, zoomLevel + 1, visibleTilesCount, originalZoomLevel, layer);
 			}
 		}
 	}
