@@ -133,11 +133,14 @@ function getBase64Image(img) {
 
 function downloadVisibleArea(visibleTilePoints, zoomLevel, layer) {
 	$.each(visibleTilePoints, function(index, tilePoint) {
-		downloadPoint(tilePoint, zoomLevel + 1, visibleTilePoints.length, zoomLevel, layer);
+		downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == visibleTilePoints.length - 1, layer);
 	});
 }
 
-function downloadPoint(tilePoint, zoomLevel, visibleTilesCount, originalZoomLevel, layer) {
+var tilesToDownloadCount = 0;
+var tilesToDownloadFinalCount = Number.MAX_VALUE;
+
+function downloadPoint(tilePoint, zoomLevel, originalZoomLevel, isLastTile, layer) {
 	var map = layer._map,
 		tileLatLng = getPointToLatLng(tilePoint),
 		mapTopLeftPoint = map._getNewTopLeftPoint(tileLatLng, zoomLevel),
@@ -157,14 +160,23 @@ function downloadPoint(tilePoint, zoomLevel, visibleTilesCount, originalZoomLeve
 				var tileImageString = getBase64Image(this);
 				downloadedTilesToStore.push({image: tileImageString, point: this.point});
 
-				if (downloadedTilesToStore.length >= Math.pow(visibleTilesCount, (zoomLevel - originalZoomLevel) + 1)) {
+				if (downloadedTilesToStore.length >= tilesToDownloadFinalCount) {
 					storeDownloadedTiles();
+
+					tilesToDownloadFinalCount = 0;
 				}
 			};
 			tileImage.src = tileImageUrl;
 
-			if (zoomLevel - originalZoomLevel < 1 && zoomLevel < map.getMaxZoom()) {
-				downloadPoint(newTilePoint, zoomLevel + 1, visibleTilesCount, originalZoomLevel, layer);
+			tilesToDownloadCount++;
+
+			var newTileIsLastTile = isLastTile && pointX == mapPointBounds.max.x && pointY == mapPointBounds.max.y;
+
+			if (zoomLevel - originalZoomLevel < 3 && zoomLevel < map.getMaxZoom()) {
+				downloadPoint(newTilePoint, zoomLevel + 1, originalZoomLevel, newTileIsLastTile, layer);
+			} else if (newTileIsLastTile) {
+				tilesToDownloadFinalCount = tilesToDownloadCount;
+				tilesToDownloadCount = 0;
 			}
 		}
 	}
