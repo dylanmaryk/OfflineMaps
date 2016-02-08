@@ -42,6 +42,9 @@ $(document).ready(function() {
 
 	var map = L.map("map");
 	map.setView(new L.LatLng(51.505, -0.09), 12);
+	map.on("viewreset", function(e) {
+		tilePoints = [];
+	});
 
 	var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 		osmLayer = new CustomTileLayer(osmUrl);
@@ -71,7 +74,7 @@ $(document).ready(function() {
 	osmLayer.addTo(map);
 
 	$("#btnDownload").click(function() {
-		downloadVisibleArea(tilePoints, map.getZoom(), osmLayer);
+		downloadVisibleArea(osmLayer);
 	});
 
 	/*
@@ -133,10 +136,14 @@ function getBase64Image(img) {
 	return dataURL;
 }
 
-function downloadVisibleArea(visibleTilePoints, zoomLevel, layer) {
-	$.each(visibleTilePoints, function(index, tilePoint) {
-		downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == visibleTilePoints.length - 1, layer);
-	});
+function downloadVisibleArea(layer) {
+	var zoomLevel = layer._map.getZoom();
+
+	if (zoomLevel <= map.getMaxZoom()) {
+		$.each(tilePoints, function(index, tilePoint) {
+			downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == tilePoints.length - 1, layer);
+		});
+	}
 }
 
 var tilesToDownloadCount = 0;
