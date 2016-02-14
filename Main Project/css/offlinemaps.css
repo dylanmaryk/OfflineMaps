@@ -45,3 +45,7 @@ html, body {
 	width: 100%;
 	color: white;
 }
+
+#downloadProgress {
+	visibility: hidden;
+}

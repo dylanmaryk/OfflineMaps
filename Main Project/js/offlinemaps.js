@@ -81,6 +81,9 @@ $(document).ready(function() {
 
 	$("#downloadButton").click(function() {
 		$("#disableBox").css("visibility", "visible");
+		$("#zoomSliderLabel").css("visibility", "visible");
+		$("#zoomSlider").css("visibility", "visible");
+		$("#confirmDownloadButton").css("visibility", "visible");
 
 		var currentMaxZoomDiff = map.getMaxZoom() - map.getZoom();
 
@@ -155,6 +158,11 @@ function getBase64Image(img) {
 }
 
 function downloadVisibleArea(zoomLevelsToDownload, layer) {
+	$("#zoomSliderLabel").css("visibility", "hidden");
+	$("#zoomSlider").css("visibility", "hidden");
+	$("#confirmDownloadButton").css("visibility", "hidden");
+	$("#downloadProgress").css("visibility", "visible");
+
 	var zoomLevel = layer._map.getZoom();
 
 	$.each(tilePoints, function(index, tilePoint) {
@@ -228,6 +236,9 @@ function storeDownloadedTileAtPos(downloadedTilePos) {
 		};
 	} else {
 		downloadedTilesToStore = [];
+
+		$("#downloadProgress").css("visibility", "hidden");
+		$("#disableBox").css("visibility", "hidden");
 	}
 }
 
