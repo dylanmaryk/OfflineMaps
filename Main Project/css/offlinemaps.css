@@ -10,7 +10,7 @@ html, body {
 	height: 100%;
 }
 
-#btnDownload {
+#downloadButton {
 	position: absolute;
 	bottom: 24px;
 	right: 24px;
@@ -41,7 +41,7 @@ html, body {
 	visibility: hidden;
 }
 
-#zoomSliderLabel, #zoomSlider, #btnConfirmDownload {
+#zoomSliderLabel, #zoomSlider, #confirmDownloadButton {
 	width: 100%;
 	color: white;
 }

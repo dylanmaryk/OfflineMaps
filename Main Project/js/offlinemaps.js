@@ -46,9 +46,9 @@ $(document).ready(function() {
 		tilePoints = [];
 
 		if (map.getZoom() < map.getMaxZoom()) {
-			$("#btnDownload").css("visibility", "visible");
+			$("#downloadButton").css("visibility", "visible");
 		} else {
-			$("#btnDownload").css("visibility", "hidden");
+			$("#downloadButton").css("visibility", "hidden");
 		}
 	});
 
@@ -79,7 +79,7 @@ $(document).ready(function() {
 	});
 	osmLayer.addTo(map);
 
-	$("#btnDownload").click(function() {
+	$("#downloadButton").click(function() {
 		$("#disableBox").css("visibility", "visible");
 
 		var currentMaxZoomDiff = map.getMaxZoom() - map.getZoom();
@@ -91,7 +91,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#btnConfirmDownload").click(function() {
+	$("#confirmDownloadButton").click(function() {
 		downloadVisibleArea($("#zoomSlider").attr("value"), osmLayer);
 	});
 
