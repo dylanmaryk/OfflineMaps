@@ -44,6 +44,12 @@ $(document).ready(function() {
 	map.setView(new L.LatLng(51.505, -0.09), 12);
 	map.on("viewreset", function(e) {
 		tilePoints = [];
+
+		if (map.getZoom() < map.getMaxZoom()) {
+			$("#btnDownload").css("visibility", "visible");
+		} else {
+			$("#btnDownload").css("visibility", "hidden");
+		}
 	});
 
 	var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -137,16 +143,11 @@ function getBase64Image(img) {
 }
 
 function downloadVisibleArea(layer) {
-	var map = layer._map,
-		zoomLevel = layer._map.getZoom();
+	var zoomLevel = layer._map.getZoom();
 
-	if (zoomLevel < map.getMaxZoom()) {
-		$.each(tilePoints, function(index, tilePoint) {
-			downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == tilePoints.length - 1, layer);
-		});
-	} else {
-		console.log("The currently visible area has already been downloaded.");
-	}
+	$.each(tilePoints, function(index, tilePoint) {
+		downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == tilePoints.length - 1, layer);
+	});
 }
 
 var tilesToDownloadCount = 0;
@@ -175,7 +176,7 @@ function downloadPoint(tilePoint, zoomLevel, originalZoomLevel, isLastTile, laye
 				if (downloadedTilesToStore.length >= tilesToDownloadFinalCount) {
 					storeDownloadedTiles();
 
-					tilesToDownloadFinalCount = 0;
+					tilesToDownloadFinalCount = Number.MAX_VALUE;
 				}
 			};
 			tileImage.src = tileImageUrl;
@@ -200,8 +201,8 @@ function storeDownloadedTiles() {
 
 function storeDownloadedTileAtPos(downloadedTilePos) {
 	if (downloadedTilePos < downloadedTilesToStore.length) {
-		var tileImagePointString = getPointString(downloadedTilesToStore[downloadedTilePos].point);
 		var tileImageString = downloadedTilesToStore[downloadedTilePos].image;
+		var tileImagePointString = getPointString(downloadedTilesToStore[downloadedTilePos].point);
 		var objectStore = getObjectStore();
 		objectStore.transaction.tilePos = downloadedTilePos;
 		objectStore.put(tileImageString, tileImagePointString).onsuccess = function(event) {
