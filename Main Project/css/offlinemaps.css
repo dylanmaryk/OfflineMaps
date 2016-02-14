@@ -41,7 +41,7 @@ html, body {
 	visibility: hidden;
 }
 
-#zoomSliderLabel, #zoomSlider, #confirmDownloadButton {
+#zoomSliderLabel, #zoomSlider, #confirmDownloadButton, #downloadProgress {
 	width: 100%;
 	color: white;
 }

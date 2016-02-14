@@ -158,14 +158,15 @@ function downloadVisibleArea(zoomLevelsToDownload, layer) {
 	var zoomLevel = layer._map.getZoom();
 
 	$.each(tilePoints, function(index, tilePoint) {
-		// downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == tilePoints.length - 1, layer);
+		downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, zoomLevelsToDownload, index == tilePoints.length - 1, layer);
 	});
 }
 
 var tilesToDownloadCount = 0;
 var tilesToDownloadFinalCount = Number.MAX_VALUE;
+var tilesDownloaded = 0;
 
-function downloadPoint(tilePoint, zoomLevel, originalZoomLevel, isLastTile, layer) {
+function downloadPoint(tilePoint, zoomLevel, originalZoomLevel, zoomLevelsToDownload, isLastTile, layer) {
 	var map = layer._map,
 		tileLatLng = getPointToLatLng(tilePoint),
 		mapTopLeftPoint = map._getNewTopLeftPoint(tileLatLng, zoomLevel),
@@ -185,10 +186,13 @@ function downloadPoint(tilePoint, zoomLevel, originalZoomLevel, isLastTile, laye
 				var tileImageString = getBase64Image(this);
 				downloadedTilesToStore.push({image: tileImageString, point: this.point});
 
+				$("#downloadProgress").attr("value", tilesDownloaded++);
+
 				if (downloadedTilesToStore.length >= tilesToDownloadFinalCount) {
 					storeDownloadedTiles();
 
 					tilesToDownloadFinalCount = Number.MAX_VALUE;
+					tilesDownloaded = 0;
 				}
 			};
 			tileImage.src = tileImageUrl;
@@ -197,11 +201,13 @@ function downloadPoint(tilePoint, zoomLevel, originalZoomLevel, isLastTile, laye
 
 			var newTileIsLastTile = isLastTile && pointX == mapPointBounds.max.x && pointY == mapPointBounds.max.y;
 
-			if (zoomLevel - originalZoomLevel < 3 && zoomLevel < map.getMaxZoom()) {
-				downloadPoint(newTilePoint, zoomLevel + 1, originalZoomLevel, newTileIsLastTile, layer);
+			if (zoomLevel - originalZoomLevel < zoomLevelsToDownload && zoomLevel < map.getMaxZoom()) {
+				downloadPoint(newTilePoint, zoomLevel + 1, originalZoomLevel, zoomLevelsToDownload, newTileIsLastTile, layer);
 			} else if (newTileIsLastTile) {
 				tilesToDownloadFinalCount = tilesToDownloadCount;
 				tilesToDownloadCount = 0;
+
+				$("#downloadProgress").attr("max", tilesToDownloadFinalCount);
 			}
 		}
 	}
