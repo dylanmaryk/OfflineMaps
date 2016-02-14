@@ -81,9 +81,7 @@ $(document).ready(function() {
 
 	$("#downloadButton").click(function() {
 		$("#disableBox").css("visibility", "visible");
-		$("#zoomSliderLabel").css("visibility", "visible");
-		$("#zoomSlider").css("visibility", "visible");
-		$("#confirmDownloadButton").css("visibility", "visible");
+		$("#sliderButtonContainer").css("visibility", "visible");
 
 		var currentMaxZoomDiff = map.getMaxZoom() - map.getZoom();
 
@@ -158,10 +156,9 @@ function getBase64Image(img) {
 }
 
 function downloadVisibleArea(zoomLevelsToDownload, layer) {
-	$("#zoomSliderLabel").css("visibility", "hidden");
-	$("#zoomSlider").css("visibility", "hidden");
-	$("#confirmDownloadButton").css("visibility", "hidden");
-	$("#downloadProgress").css("visibility", "visible");
+	$("#sliderButtonContainer").css("visibility", "hidden");
+	$("#progressLabelContainer").css("visibility", "visible");
+	$("#downloadProgressLabel").text("Downloading...");
 
 	var zoomLevel = layer._map.getZoom();
 
@@ -222,6 +219,8 @@ function downloadPoint(tilePoint, zoomLevel, originalZoomLevel, zoomLevelsToDown
 }
 
 function storeDownloadedTiles() {
+	$("#downloadProgressLabel").text("Storing...");
+
 	storeDownloadedTileAtPos(0);
 }
 
@@ -237,7 +236,8 @@ function storeDownloadedTileAtPos(downloadedTilePos) {
 	} else {
 		downloadedTilesToStore = [];
 
-		$("#downloadProgress").css("visibility", "hidden");
+		$("#downloadProgress").attr("value", 0);
+		$("#progressLabelContainer").css("visibility", "hidden");
 		$("#disableBox").css("visibility", "hidden");
 	}
 }

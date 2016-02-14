@@ -15,10 +15,15 @@
 		<div id="downloadButton"></div>
 		<div id="disableBox">
 			<div>
-				<p id="zoomSliderLabel">How many levels deep do you want to download?</p>
-				<paper-slider id="zoomSlider" min="1" pin snaps></paper-slider>
-				<paper-button id="confirmDownloadButton" raised>Download</paper-button>
-				<paper-progress id="downloadProgress"></paper-progress>
+				<div id="sliderButtonContainer">
+					<p id="zoomSliderLabel" class="disableBoxElements">How many levels deep do you want to download?</p>
+					<paper-slider id="zoomSlider" class="disableBoxElements" min="1" pin snaps></paper-slider>
+					<paper-button id="confirmDownloadButton" class="disableBoxElements" raised>Download</paper-button>
+				</div>
+				<div id="progressLabelContainer">
+					<paper-progress id="downloadProgress" class="disableBoxElements"></paper-progress>
+					<p id="downloadProgressLabel" class="disableBoxElements"></p>
+				</div>
 			</div>
 		</div>
 	</body>

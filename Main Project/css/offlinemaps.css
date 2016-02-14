@@ -41,11 +41,15 @@ html, body {
 	visibility: hidden;
 }
 
-#zoomSliderLabel, #zoomSlider, #confirmDownloadButton, #downloadProgress {
-	width: 100%;
-	color: white;
+#progressLabelContainer {
+	visibility: hidden;
 }
 
-#downloadProgress {
-	visibility: hidden;
+#downloadProgressLabel {
+	text-align: center;
+}
+
+.disableBoxElements {
+	width: 100%;
+	color: white;
 }
