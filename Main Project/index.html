@@ -1,6 +1,8 @@
 <!DOCTYPE HTML>
 <html manifest="offlinemaps.appcache">
 	<head>
+		<link rel="import" href="bower_components/paper-slider/paper-slider.html">
+		<link rel="import" href="bower_components/paper-button/paper-button.html">
 		<link rel="stylesheet" href="css/leaflet.css" />
 		<link rel="stylesheet" href="css/offlinemaps.css" />
 		<script src="js/jquery.min.js"></script>
@@ -10,6 +12,13 @@
 	</head>
 	<body>
 		<div id="map"></div>
-		<div id="btnDownload" />
+		<div id="btnDownload"></div>
+		<div id="disableBox">
+			<div>
+				<p id="zoomSliderLabel">How many levels deep do you want to download?</p>
+				<paper-slider id="zoomSlider" min="1" max="2" value="1" pin snaps></paper-slider>
+				<paper-button id="btnConfirmDownload" raised>Download</paper-button>
+			</div>
+		</div>
 	</body>
 </html>

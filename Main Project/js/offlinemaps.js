@@ -80,7 +80,19 @@ $(document).ready(function() {
 	osmLayer.addTo(map);
 
 	$("#btnDownload").click(function() {
-		downloadVisibleArea(osmLayer);
+		$("#disableBox").css("visibility", "visible");
+
+		var currentMaxZoomDiff = map.getMaxZoom() - map.getZoom();
+
+		if (currentMaxZoomDiff >= 2) {
+			$("#zoomSlider").attr("max", currentMaxZoomDiff);
+		} else {
+			downloadVisibleArea($("#zoomSlider").attr("value"), osmLayer);
+		}
+	});
+
+	$("#btnConfirmDownload").click(function() {
+		downloadVisibleArea($("#zoomSlider").attr("value"), osmLayer);
 	});
 
 	/*
@@ -142,11 +154,11 @@ function getBase64Image(img) {
 	return dataURL;
 }
 
-function downloadVisibleArea(layer) {
+function downloadVisibleArea(zoomLevelsToDownload, layer) {
 	var zoomLevel = layer._map.getZoom();
 
 	$.each(tilePoints, function(index, tilePoint) {
-		downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == tilePoints.length - 1, layer);
+		// downloadPoint(tilePoint, zoomLevel + 1, zoomLevel, index == tilePoints.length - 1, layer);
 	});
 }
 
