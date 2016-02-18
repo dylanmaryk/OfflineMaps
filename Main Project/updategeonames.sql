@@ -1,0 +1,1 @@
+LOAD DATA LOCAL INFILE "/home/dylan/dylanmaryk.com/offlinemaps/main/cities1000.txt" INTO TABLE OfflineMaps.GeoNames;
