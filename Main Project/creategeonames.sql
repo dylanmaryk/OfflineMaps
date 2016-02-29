@@ -1,6 +1,5 @@
-CREATE DATABASE OfflineMaps;
-USE OfflineMaps;
-CREATE TABLE GeoNames (
+CREATE DATABASE offlinemaps;
+CREATE TABLE geoname (
 	geonameid INT,
 	name varchar(200),
 	asciiname varchar(200),
@@ -20,5 +19,4 @@ CREATE TABLE GeoNames (
 	gtopo30 INT,
 	timezone varchar(100),
 	modificationdate date
-)
-CHARACTER SET utf8;
+);
