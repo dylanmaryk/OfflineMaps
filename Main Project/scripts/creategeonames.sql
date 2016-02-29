@@ -20,3 +20,4 @@ CREATE TABLE geoname (
 	timezone varchar(100),
 	modificationdate date
 );
+SELECT AddGeometryColumn('geoname', 'coord', 4326, 'POINT', 2);

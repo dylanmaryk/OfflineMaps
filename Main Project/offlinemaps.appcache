@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 17-02-2016 19:53
+# 29-02-2016 12:40
 css/leaflet.css
 css/offlinemaps.css
 js/jquery.min.js
@@ -8,7 +8,7 @@ js/images/marker-icon.png
 js/images/marker-shadow.png
 js/offlinemaps.js
 js/osmtogeojson.js
-london.osm
+# london.osm
 
 NETWORK:
 *
