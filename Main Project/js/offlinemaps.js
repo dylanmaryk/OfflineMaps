@@ -50,6 +50,14 @@ $(document).ready(function() {
 		} else {
 			$("#downloadButton").css("visibility", "hidden");
 		}
+
+		var mapCenter = map.getCenter();
+		var mapLat = mapCenter.lat;
+		var mapLng = mapCenter.lng;
+
+		$.get("http://dylanmaryk.com:8110/name?lat=" + mapLat + "&long=" + mapLng, function(data) {
+			alert(data);
+		});
 	});
 
 	var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",

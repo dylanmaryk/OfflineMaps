@@ -1,8 +1,13 @@
 require 'pg'
 require 'sinatra'
+require 'sinatra/cross_origin'
  
 set :port, 8110
 set :environment, :production
+
+configure do
+	enable :cross_origin
+end
 
 get '/name' do
 	conn = PG::Connection.open(:dbname => 'offlinemaps', :user => 'postgres', :password => 'offlinemaps')
