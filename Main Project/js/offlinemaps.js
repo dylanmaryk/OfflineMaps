@@ -40,9 +40,15 @@ $(document).ready(function() {
 		console.log("Created new object store.");
 	};
 
-	var map = L.map("map");
+	var map = L.map("map", {attributionControl: false});
 	map.setView(new L.LatLng(51.505, -0.09), 12);
-	map.on("viewreset", function(e) {
+	map.on("load", function(event) {
+		displayLocation(map);
+	});
+	map.on("moveend", function(event) {
+		displayLocation(map);
+	});
+	map.on("viewreset", function(event) {
 		tilePoints = [];
 
 		if (map.getZoom() < map.getMaxZoom()) {
@@ -50,14 +56,6 @@ $(document).ready(function() {
 		} else {
 			$("#downloadButton").css("visibility", "hidden");
 		}
-
-		var mapCenter = map.getCenter();
-		var mapLat = mapCenter.lat;
-		var mapLng = mapCenter.lng;
-
-		$.get("http://dylanmaryk.com:8110/name?lat=" + mapLat + "&long=" + mapLng, function(data) {
-			alert(data);
-		});
 	});
 
 	var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -85,6 +83,9 @@ $(document).ready(function() {
 			}
 		}
 	});
+	osmLayer.on("load", function(event) {
+		displayLocation(map);
+	});
 	osmLayer.addTo(map);
 
 	$("#downloadButton").click(function() {
@@ -103,14 +104,6 @@ $(document).ready(function() {
 	$("#confirmDownloadButton").click(function() {
 		downloadVisibleArea($("#zoomSlider").attr("value"), osmLayer);
 	});
-
-	/*
-	$.get("london.osm", function(data) {
-		var dataParsed = $.parseXML(data);
-		var dataGeoJson = osmtogeojson(dataParsed);
-		L.geoJson(dataGeoJson).addTo(map);
-	});
-	*/
 });
 
 function loadStoredTileImage(tile, remoteUrl) {
@@ -125,7 +118,6 @@ function loadStoredTileImage(tile, remoteUrl) {
 			} else {
 				// Load remote image if failed to find stored copy
 				tile.src = remoteUrl;
-				// console.log("No tile image stored for point " + tileImagePointString + ".");
 			}
 		};
 	} else {
@@ -256,6 +248,16 @@ function getPointToLatLng(point) {
 		lat = 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 
 	return new L.LatLng(lat, lng);
+}
+
+function displayLocation(map) {
+	var mapCenter = map.getCenter();
+	var mapLat = mapCenter.lat;
+	var mapLng = mapCenter.lng;
+
+	$.get("http://dylanmaryk.com:8110/name?lat=" + mapLat + "&long=" + mapLng, function(data) {
+		$("#locationLabel").text(data);
+	});
 }
 
 var CustomTileLayer = L.TileLayer.extend({
