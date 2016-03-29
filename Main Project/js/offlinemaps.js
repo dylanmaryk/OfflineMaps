@@ -49,7 +49,8 @@ $(document).ready(function() {
 	};
 
 	// Create new map
-	var map = L.map("map", {attributionControl: false});
+	var map = L.map("map");
+	map.attributionControl.addAttribution("&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors");
 	map.setView(new L.LatLng(51.505, -0.09), 12);
 	// On map first loading
 	map.on("load", function(event) {
