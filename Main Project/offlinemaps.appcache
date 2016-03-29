@@ -4,8 +4,6 @@ css/leaflet.css
 css/offlinemaps.css
 js/jquery.min.js
 js/leaflet.js
-js/images/marker-icon.png
-js/images/marker-shadow.png
 js/offlinemaps.js
 
 NETWORK:
