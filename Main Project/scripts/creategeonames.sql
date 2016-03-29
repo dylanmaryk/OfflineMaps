@@ -1,4 +1,6 @@
 CREATE DATABASE offlinemaps;
+\c offlinemaps
+CREATE EXTENSION postgis;
 CREATE TABLE geoname (
 	geonameid INT,
 	name varchar(200),
