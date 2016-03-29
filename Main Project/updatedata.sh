@@ -6,5 +6,5 @@ wget -O img/download.png "https://raw.githubusercontent.com/google/material-desi
 wget -O cities1000.zip "http://download.geonames.org/export/dump/cities1000.zip"
 unzip cities1000.zip
 rm cities1000.zip
-sudo -u postgres psql offlinemaps -f /home/dylan/dylanmaryk.com/offlinemaps/main/scripts/updategeonames.sql
+sudo -u postgres psql offlinemaps -f scripts/updategeonames.sql
 rm cities1000.txt
