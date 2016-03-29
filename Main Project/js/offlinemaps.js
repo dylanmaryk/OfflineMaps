@@ -62,13 +62,6 @@ $(document).ready(function() {
 	// On user zooming map
 	map.on("viewreset", function(event) {
 		tilePoints = [];
-
-		// Hide download button if at maximum zoom level
-		if (map.getZoom() < map.getMaxZoom()) {
-			$("#downloadButton").css("visibility", "visible");
-		} else {
-			$("#downloadButton").css("visibility", "hidden");
-		}
 	});
 
 	// Add new layer of tiles to map
@@ -296,6 +289,16 @@ function displayLocation(map) {
 
 	$.get("http://dylanmaryk.com:8110/name?lat=" + mapLat + "&long=" + mapLng, function(data) {
 		$("#locationLabel").text(data);
+
+		// Show download button if online and not at maximum zoom level
+		if (map.getZoom() < map.getMaxZoom()) {
+			$("#downloadButton").css("visibility", "visible");
+		} else {
+			$("#downloadButton").css("visibility", "hidden");
+		}
+	}).fail(function() {
+		// Hide download button if offline
+		$("#downloadButton").css("visibility", "hidden");
 	});
 }
 

@@ -1,7 +1,8 @@
 CACHE MANIFEST
-# 29-03-2016 01:57
+# 29-03-2016 02:12
 css/leaflet.css
 css/offlinemaps.css
+img/download.png
 js/jquery.min.js
 js/leaflet.js
 js/offlinemaps.js
