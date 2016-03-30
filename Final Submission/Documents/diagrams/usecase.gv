@@ -1,0 +1,7 @@
+digraph {
+	"Website" -> "Actor" [arrowhead=none]
+	"Website" -> "View cached tiles" [label=" <<include>>"]
+	"Download visible areas" -> "Number of zoom levels" [label=" <<include>>"]
+	"Download visible areas" -> "Website" [label=" <<extend>>"]
+	"Website" -> "View location names" [label=" <<include>>"]
+}

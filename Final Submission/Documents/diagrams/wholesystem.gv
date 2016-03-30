@@ -1,0 +1,12 @@
+digraph {
+	rankdir=RL
+
+	node [shape=rect]
+
+	"Local cache" -> "Website front-end" [dir=both]
+	"Local database" -> "Website front-end" [dir=both]
+	"OpenStreetMap API" -> "Map"
+	"Map" -> "Website front-end" [dir=both]
+	"Database of city data" -> "Location name API"
+	"Location name API" -> "Website front-end" [dir=both]
+}

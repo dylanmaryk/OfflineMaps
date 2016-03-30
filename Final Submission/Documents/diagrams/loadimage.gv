@@ -1,0 +1,28 @@
+digraph {
+	opt1 [label="Has the database loaded?", shape=diamond]
+	opt2 [label="Is the tile's point already 
+	in the database?", shape=diamond]
+
+	proc3 [label="Load the map square", shape=rect]
+	proc4 [label="Push the tile's point to the 
+	array of current tile points", shape=rect]
+	proc5 [label="Push the tile's point and 
+	remote image URL to the array of 
+	tiles to load", shape=rect]
+	proc1 [label="Set the tile's image source 
+	to the image from 
+	the database", shape=rect]
+	proc2 [label="Set the tile's image source 
+	to the remote image URL", shape=rect]
+
+	"Start" ->
+	proc3 ->
+	proc4 ->
+	opt1
+	opt1 -> opt2 [label=" Yes"]
+	opt1 -> proc5 [label=" No"]
+	opt2 -> proc1 [label=" Yes"]
+	opt2 -> proc2 [label=" No"]
+	proc1 -> "Stop"
+	proc2 -> "Stop"
+}

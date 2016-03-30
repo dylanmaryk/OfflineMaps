@@ -1,0 +1,24 @@
+digraph {
+	opt1 [label="Was the tile's image loaded 
+	from the database?", shape=diamond]
+	opt2 [label="Has the database loaded?", shape=diamond]
+
+	proc4 [label="Tile's image loaded", shape=rect]
+	proc1 [label="Set the tile's image source to 
+	the image from the database", shape=rect]
+	proc2 [label="Store the tile's image and 
+	point in the database", shape=rect]
+	proc3 [label="Push the tile's image and 
+	point to the array of tiles to store", shape=rect]
+
+	"Start" ->
+	proc4 ->
+	opt1
+	opt1 -> proc1 [label=" Yes"]
+	opt1 -> opt2 [label=" No"]
+	opt2 -> proc2 [label=" Yes"]
+	opt2 -> proc3 [label=" No"]
+	proc1 -> "Stop"
+	proc2 -> "Stop"
+	proc3 -> "Stop"
+}

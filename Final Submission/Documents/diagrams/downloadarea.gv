@@ -1,0 +1,43 @@
+digraph {
+	opt1 [label="Is there another point in the array of 
+	current tile points to download?", shape=diamond]
+	opt2 [label="Is there another 'x' between the 
+	minimum and maximum 'x's?", shape=diamond]
+	opt3 [label="Is there another 'y' between the 
+	minimum and maximum 'y's?", shape=diamond]
+	opt4 [label="Are there more zoom levels to 
+	download tile images for?", shape=diamond]
+	opt5 [label="Is there another tile to store in 
+	the array of downloaded tiles to store?", shape=diamond]
+
+	proc4 [label="User clicks the 
+	download button on the map", shape=rect]
+	proc1 [label="Calculate the minimum and maximum 
+	point bounds of the map", shape=rect]
+	proc2 [label="Create a new point with the 'x', 'y' and zoom level", shape=rect]
+	proc5 [label="Download the image from the 
+	remote image URL for the point", shape=rect]
+	proc6 [label="Push the image and the point to 
+	the array of tiles to store", shape=rect]
+	proc3 [label="Store the image and point in the database", shape=rect]
+
+	"Start" ->
+	proc4 ->
+	opt1
+	opt1 -> proc1 [label=" Yes"]
+	opt1 -> opt5 [label=" No"]
+	opt2 -> opt3 [label=" Yes"]
+	opt2 -> opt1 [label=" No"]
+	opt3 -> proc2 [label=" Yes"]
+	opt3 -> opt2 [label=" No"]
+	proc1 -> opt2
+	proc2 ->
+	proc5 ->
+	proc6 ->
+	opt4
+	opt4 -> proc1 [label=" Yes"]
+	opt4 -> opt1 [label=" No"]
+	opt5 -> proc3 [label=" Yes"]
+	opt5 -> "Stop" [label=" No"]
+	proc3 -> opt5
+}
